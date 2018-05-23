@@ -5,33 +5,21 @@ using UnityEngine;
 
 public class PathCreator : MonoBehaviour {
 
-    //[HideInInspector]
     [SerializeField]
-    public Path[] path = new Path[0];
+    public List<PathSection> paths = new List<PathSection>();
+
+    [HideInInspector]
+    public PathSection currentSection;
 
     [SerializeField]
-    public Path currentSection;
+    public PathSection nextSection;
 
-    [SerializeField]
-    public Path CurrentSection
+    void Start()
     {
-        get
-        {
-            return currentSection != null ? CurrentSection : nextSection;
-        }
-        set {
-            currentSection = value;
-        }
+        nextSection = ScriptableObject.CreateInstance<BezierPath>();
     }
 
-    public void SetDefaultCurrentSection() {
-        this.currentSection = nextSection;
-    }
-
-    [SerializeField]
-    public Path nextSection = new BezierPath(new Vector2());
-
-	public Color anchorCol = Color.red;
+    public Color anchorCol = Color.red;
     public Color controlCol = Color.white;
     public Color segmentCol = Color.green;
     public Color selectedSegmentCol = Color.yellow;
@@ -41,23 +29,12 @@ public class PathCreator : MonoBehaviour {
 
     public void CreateNewPathSection()
     {
-        //path = new Path(transform.position);
-        int pathLength = path.Length;
-        var newPath = new Path[pathLength+1];
-        var i = 0;
-        for (; i < path.Length; i++) {
-            newPath[i] = path[i];
-        }
-        newPath[i] = nextSection;
-        path = newPath;
+        Debug.Log("CreateNewPathSection");
+
         //Camera camera1 = SceneView.currentDrawingSceneView.camera;
         //Vector3 sceneCameraPos = camera1.transform.position;
         Vector2 nextPathLocation = new Vector2(0, 0); // TODO: get this from elsewhere 
-        nextSection = new BezierPath(nextPathLocation);
-    }
-
-    public void DeletePath() {
-        path = new Path[0];
+        paths.Add(new BezierPath());
     }
 
     void Reset()

@@ -2,19 +2,18 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
 
-[System.Serializable]
-public class BezierPath : Path
+public class BezierPath : PathSection
 {
     
-    [SerializeField, HideInInspector]
     bool autoSetControlPoints;
 
     const float segmentSelectDistanceThreshold = .1f;
 
     int selectedSegmentIndex = -1;
 
-    public BezierPath(Vector2 centre)
+    public BezierPath()
     {
+        Vector2 centre = new Vector2(0, 0);
         points = new List<Vector2>
         {
             centre + Vector2.left,
@@ -22,6 +21,7 @@ public class BezierPath : Path
             centre + (Vector2.right+Vector2.down)*.5f,
             centre + Vector2.right
         };
+        pathType = PathType.BEZIER;
     }
 
     public Vector2 this[int i]
@@ -120,11 +120,9 @@ public class BezierPath : Path
     public void MovePoint(int i, Vector2 pos)
     {
         Vector2 deltaMove = pos - points[i];
-
         if (i % 3 == 0 || !autoSetControlPoints)
         {
             points[i] = pos;
-
             if (autoSetControlPoints)
             {
                 AutoSetAllAffectedControlPoints(i);
@@ -194,7 +192,6 @@ public class BezierPath : Path
                 previousPoint = pointOnCurve;
             }
         }
-
         return evenlySpacedPoints.ToArray();
     }
 
@@ -257,7 +254,6 @@ public class BezierPath : Path
     {
         points[1] = (points[0] + points[2]) * .5f;
         points[points.Count - 2] = (points[points.Count - 1] + points[points.Count - 3]) * .5f;
-
     }
 
     int LoopIndex(int i)
@@ -265,18 +261,18 @@ public class BezierPath : Path
         return (i + points.Count) % points.Count;
     }
 
-    public override void SceneShiftClick(Vector2 mousePos)
+    public override void SceneShiftClick(Vector2 mousePos, PathCreator creator)
     {
         if (selectedSegmentIndex != -1)
         {
 
             SplitSegment(mousePos, selectedSegmentIndex);
         }
-        //else if (!this.IsClosed)
-        //{
-        //    Undo.RecordObject(creator, "Add segment");
-        //    CurrentPath.AddSegment(mousePos);
-        //}
+        else 
+        {
+            Undo.RecordObject(creator, "Add segment");
+            AddSegment(mousePos);
+        }
     }
 
     public override void SceneRightClick(Vector2 mousePos, PathCreator creator)

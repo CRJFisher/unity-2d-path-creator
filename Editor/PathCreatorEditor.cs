@@ -8,35 +8,29 @@ public class PathCreatorEditor : Editor {
 
     PathCreator creator;
 
-    public Path currentPath = null;
-
-    Path CurrentPath {
-        get 
-        {
-            if (creator.currentSection == null) {
-                creator.SetDefaultCurrentSection();
-            }
-            return creator.currentSection;
-        }
-        set {
-            creator.currentSection = value;
-        }
-    }
-
-
-    Path[] Paths
+    List<PathSection> PathSections
     {
         get
         {
-            return creator.path;
+            return creator.paths;
         }
     }
 
-    private int? selectedIdx = null;
+    public int numberOfSelectedSections = 0;
+
+    // Triggered by user events in the scene view
+    void OnSceneGUI()
+    {
+        Debug.Log("On scene gui");
+        if (creator.currentSection == null) {
+            return;
+        }
+        Input();
+        creator.currentSection.Draw(creator);
+    }
 
     public override void OnInspectorGUI()
     {
-
         base.OnInspectorGUI();
 
         EditorGUI.BeginChangeCheck();
@@ -44,24 +38,24 @@ public class PathCreatorEditor : Editor {
         // Check current path
         CheckSelected();
 
-        switch (CurrentPath.pathType)
-        {
-            case (Path.PathType.ARC):
-                // arc editor methods
-                break;
-            case (Path.PathType.BEZIER):
-                break;
-        }
+        //if (creator.currentSection == null)
+        //{
+        //    return;
+        //}
 
         if (GUILayout.Button("Create new"))
         {
             Undo.RecordObject(creator, "Create new");
             creator.CreateNewPathSection();
         }
-        if (GUILayout.Button("Delete all"))
+        if (GUILayout.Button("Show selected"))
         {
-            Undo.RecordObject(creator, "Delete all");
-            creator.DeletePath();
+            for (var i = 0; i < PathSections.Count(); i++) {
+                if (PathSections[i].isSelected) {
+                    Debug.Log(i);
+                    Debug.Log(creator.currentSection.GetType());
+                }
+            }
         }
 
         //bool isClosed = GUILayout.Toggle(Path.IsClosed, "Closed");
@@ -84,47 +78,31 @@ public class PathCreatorEditor : Editor {
         }
     }
 
-    private void SetNewSelected(Path[] paths)
+    private void CheckSelected()
     {
-        if (selectedIdx != null) {
-            paths[(int)selectedIdx].isSelected = false;
-        }
-        for (var i = 0; i < Paths.Length; i++)
+        List<PathSection> selectedPaths = PathSections
+            .Where(x => x.isSelected).ToList();
+        if (selectedPaths.Count != numberOfSelectedSections || 
+            selectedPaths.Count == 2)
         {
-            if (paths[i].isSelected)
+            numberOfSelectedSections = 1;
+            SetNewSelected();
+        }
+    }
+
+    private void SetNewSelected()
+    {
+        if (creator.currentSection != null)
+        {
+            creator.currentSection.isSelected = false;
+        }
+        foreach (var p in PathSections)
+        {
+            if (p.isSelected)
             {
-                selectedIdx = i;
-                CurrentPath = Paths[i];
+                creator.currentSection = p;
             }
         }
-    }
-
-    private void CheckSelected() {
-
-        List<Path> _paths = new List<Path>(Paths);
-        List<Path> selectedPaths = _paths.Where(x => x.isSelected).ToList();
-
-        if (selectedPaths.Count == 2) {
-            Debug.Log(selectedIdx);
-            SetNewSelected(Paths);
-        }
-    }
-
-    private int? FindSelected() {
-        int? selectedIx = null;
-
-        for (int i = 0; i < Paths.Length; i++) {
-            if (Paths[i].isSelected) selectedIx = i;
-        }
-        return selectedIx;
-    }
-
-    void OnSceneGUI()
-    {
-        selectedIdx = FindSelected();
-        CheckSelected();
-        Input();
-        CurrentPath.Draw(creator);
     }
 
     void Input()
@@ -134,17 +112,17 @@ public class PathCreatorEditor : Editor {
 
         if (guiEvent.type == EventType.MouseDown && guiEvent.button == 0 && guiEvent.shift)
         {
-            CurrentPath.SceneShiftClick(mousePos);
+            creator.currentSection.SceneShiftClick(mousePos, creator);
         }
 
         if (guiEvent.type == EventType.MouseDown && guiEvent.button == 1)
         {
-            CurrentPath.SceneRightClick(mousePos, creator);
+            creator.currentSection.SceneRightClick(mousePos, creator);
         }
 
         if (guiEvent.type == EventType.MouseMove)
         {
-            CurrentPath.SceneMouseMove(mousePos);
+            creator.currentSection.SceneMouseMove(mousePos);
         }
 
         HandleUtility.AddDefaultControl(0);
@@ -152,9 +130,7 @@ public class PathCreatorEditor : Editor {
 
     void OnEnable()
     {
+        Debug.Log("On enable");
         creator = (PathCreator)target;
-
-        creator.CreateNewPathSection();
-        selectedIdx = 0;
     }
 }

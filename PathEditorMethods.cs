@@ -4,13 +4,13 @@ using System.Collections;
 static public class PathEditorMethods
 {
 
-    public static System.String GetString(this Path.PathType path)
+    public static System.String GetString(this PathSection.PathType path)
     {
         switch (path)
         {
-            case Path.PathType.ARC:
+            case PathSection.PathType.ARC:
                 return "Yeah!";
-            case Path.PathType.BEZIER:
+            case PathSection.PathType.BEZIER:
                 return "Okay!";
             default:
                 return "What?!";
