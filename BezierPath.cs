@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
 
+[System.Serializable]
 public class BezierPath : PathSection
 {
     
@@ -129,7 +130,6 @@ public class BezierPath : PathSection
             }
             else
             {
-
                 if (i % 3 == 0)
                 {
                     if (i + 1 < points.Count)

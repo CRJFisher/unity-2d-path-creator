@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 [Serializable]
+[CanEditMultipleObjects]
 public abstract class PathSection : ScriptableObject {
 
     public enum PathType {

@@ -57,6 +57,10 @@ public class PathCreatorEditor : Editor {
                 }
             }
         }
+        if (GUILayout.Button("Show selectedIdx"))
+        {            
+            Debug.Log(numberOfSelectedSections);
+        }
 
         //bool isClosed = GUILayout.Toggle(Path.IsClosed, "Closed");
         //if (isClosed != Path.IsClosed)

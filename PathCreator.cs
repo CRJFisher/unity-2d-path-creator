@@ -3,7 +3,13 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+
 public class PathCreator : MonoBehaviour {
+
+    /// <summary>
+    /// TODO: 1. Connect the paths at their shared ends
+    /// TODO: 2. Show all the paths but highlight the current
+    /// </summary>
 
     [SerializeField]
     public List<PathSection> paths = new List<PathSection>();
